@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Subir Archivo Excel</title>
+</head>
+    <body>
+        <h1>Sube un archivo Excel</h1>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".xlsx">
+            <button type="button" onclick="uploadExcel()">Subir</button>
+        </form>
+    </body>
+    <script>
+        const uploadExcel = async () => {
+        const input = document.querySelector('input[type="file"]');
+        const formData = new FormData();
+        formData.append('file', input.files[0]); // Añade el archivo al FormData
+
+        try {
+            const response = await fetch('http://127.0.0.1:5000/upload', {
+            method: 'POST',
+            body: formData,
+            });
+
+            if (response.ok) {
+            console.log('Archivo enviado con éxito');
+            } else {
+            console.error('Error al enviar el archivo');
+            }
+        } catch (error) {
+            console.error('Error en la solicitud:', error);
+        }
+};
+    </script>
+</html>
