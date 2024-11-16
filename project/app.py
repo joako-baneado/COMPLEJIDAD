@@ -6,8 +6,6 @@ from pyvis.network import Network
 
 app = Flask(__name__)
 
-
-
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -15,6 +13,11 @@ def index():
 @app.route('/ingresar-dataset')
 def ingresarDataset():
     return render_template('ingresar-dataset.html')
+
+@app.route('/usar-dataset')
+def usarDataset():
+    return render_template('mostrar-resultados.html')
+
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
