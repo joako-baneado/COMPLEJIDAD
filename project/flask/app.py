@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 import pandas as pd
 from utiles import *
 import networkx as nx
+from pyvis.network import Network
 
 app = Flask(__name__)
 
@@ -17,6 +18,8 @@ def ingresarDataset():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
+    global G, distancia_minima, camino
+
     if 'file' not in request.files:
         return jsonify({'error': 'No se encontró el archivo'}), 400
 
@@ -26,69 +29,42 @@ def upload_file():
         return jsonify({'error': 'No se seleccionó un archivo'}), 400
 
     try:
-        # Lee el archivo Excel en un DataFrame de pandas
+        # Leer el archivo Excel y construir el grafo
         df = pd.read_excel(file)
         G = crear_grafo_desde_excel(df)
 
+        # Obtener nodos de inicio y fin desde el formulario
+        nodo_inicio = request.form.get('nodo_inicio')
+        nodo_fin = request.form.get('nodo_fin')
+
+        if not nodo_inicio or not nodo_fin:
+            return jsonify({'error': 'Debe proporcionar nodos de inicio y fin'}), 400
+
+        # Calcular el camino más corto
         distancia_minima, camino = dijkstra(G, nodo_inicio, nodo_fin)
-        
-        print(f"\nDistancia mínima desde {nodo_inicio} hasta {nodo_fin}: {distancia_minima} metros")
-        print(f"Camino más corto: {' -> '.join(camino)}")
 
-        
-        #obtener_grafico(G,camino)
-        #introducir aca metodo para graficar
-        
-        print(df.head())
-
-
-
-        return jsonify({'message': 'Archivo recibido y procesado con éxito'}), 200
+        # Redirigir a la página de resultados
+        return redirect(url_for('resultados'))
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/resultados')
+def resultados():
+    global G, distancia_minima, camino
 
-"""
-@app.route('/')
-def index():
-    return render_template('index.html')
+    if G is None or distancia_minima is None or camino is None:
+        return jsonify({'error': 'No hay resultados para mostrar. Por favor, cargue un archivo.'}), 400
 
-@app.route('/ingresar-dataset', methods=['POST'])
-def ingresarDataset():
-    return render_template('ingresar-dataset.html')
+    path_edges = list(zip(camino, camino[1:]))
 
-@app.route('/usar-dataset')
-def usarDataset():
-    return render_template('usar-dataset.html')
+    # Crear grafo interactivo con pyvis
+    net = Network(height="750px", width="100%", bgcolor="#222222", font_color="white")
+    for node in camino:
+        net.add_node(node, label=node)
+    for edge in path_edges:
+        net.add_edge(*edge, value=G.edges[edge]['weight'])
 
-# Ruta para procesar el archivo subido
-@app.route('/upload', methods=['POST'])
-def upload_file():
-    # Verifica si se ha subido un archivo
-    if 'file' not in request.files:
-        return "No se subió ningún archivo."
-
-    file = request.files['file']
-    
-    # Verifica que el archivo tenga extensión .xlsx
-    if file.filename == '':
-        return "El archivo no tiene nombre."
-    if not file.filename.endswith('.xlsx'):
-        return "Solo se permiten archivos .xlsx."
-
-    # Lee el archivo en un DataFrame de pandas
-    df = pd.read_excel(file)
-    
-    # Llama a una función para procesar el DataFrame
-    resultado = procesar_excel(df)
-    
-    return f"Resultado del procesamiento: {resultado}"
-
-def procesar_excel(df):
-    # Ejemplo de procesamiento: devuelve la cantidad de filas y columnas del archivo
-    filas, columnas = df.shape
-    return f"El archivo tiene {filas} filas y {columnas} columnas."
-"""
+    return render_template("mostrar-resultados.html", nodos=net.nodes, aristas=net.edges)
 
 if __name__ == '__main__':
     app.run(debug=True)
