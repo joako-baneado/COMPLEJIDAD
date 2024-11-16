@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 import pandas as pd
 from utiles import *
+import networkx as nx
 
 app = Flask(__name__)
 
@@ -34,10 +35,13 @@ def upload_file():
         print(f"\nDistancia mínima desde {nodo_inicio} hasta {nodo_fin}: {distancia_minima} metros")
         print(f"Camino más corto: {' -> '.join(camino)}")
 
-        #graficar(G,camino)
+        
+        #obtener_grafico(G,camino)
         #introducir aca metodo para graficar
         
         print(df.head())
+
+
 
         return jsonify({'message': 'Archivo recibido y procesado con éxito'}), 200
     except Exception as e:
