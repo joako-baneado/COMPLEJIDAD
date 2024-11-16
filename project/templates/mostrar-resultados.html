@@ -147,7 +147,7 @@
     function drawGraph() {
         var container = document.getElementById('mynetwork');
         // parsing and collecting nodes and edges from the python
-        // NO HAY ERROR EL PROBLEMA ES CON VSCODE PERO FLASK SI LO EJECUTA
+        // NO HAY ERROR EL PROBLEMA ES CON VSCODE PERO FLASK SI LO EJECUTAz
         nodes = new vis.DataSet({{ nodos | safe }});
         edges = new vis.DataSet({{ aristas | safe }});
         nodeColors = {};
