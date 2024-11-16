@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 import pandas as pd
-from grafdijkstra import *
+from utiles import *
 
 app = Flask(__name__)
 
