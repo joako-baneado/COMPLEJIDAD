@@ -100,16 +100,15 @@
 {% block body %}
 <div class="container">
     <div class="sidebar">
-        <button>Mostrar lista de nodos</button>
         <label for="nodo-inicial">Nodo Inicial:</label>
         <input type="text" id="nodo-inicial" value="TAN-159">
         
         <label for="nodo-final">Nodo Final:</label>
         <input type="text" id="nodo-final" value="USR-034">
         
-        <button>Flujo máximo</button>
-        <button>Camino mínimo</button>
-        <button>Caminos críticos</button>
+        <button data-algoritmo="flujo-maximo">Flujo máximo</button>
+        <button data-algoritmo="dijkstra">Camino mínimo</button>
+        <button data-algoritmo="caminos-criticos">Caminos críticos</button>
     </div>
     
     <div class="main-content">
@@ -126,6 +125,90 @@
         </div>
     </div>
 
+    <script>
+    function actualizarGrafico(algoritmo) {
+        const nodoInicio = document.getElementById('nodo-inicial').value;
+        const nodoFin = document.getElementById('nodo-final').value;
+
+        fetch(`/calcular/${algoritmo}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ nodo_inicio: nodoInicio, nodo_fin: nodoFin }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                // Actualizar información
+                document.querySelector('.interpretacion').innerText = data.info;
+
+                // Actualizar el gráfico
+                const nodes = new vis.DataSet(data.nodos || []);
+                const edges = new vis.DataSet(data.aristas || []);
+                const container = document.getElementById('mynetwork');
+                const dataVis = { nodes, edges };
+
+                nodeColors = {};
+                allNodes = nodes.get({ returnType: "Object" });
+                for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                }
+                var options = {
+                    "configure": {
+                        "enabled": false
+                    },
+
+                    edges: {
+                        font: {
+                            align: 'middle', // Centra el texto sobre las aristas
+                        },
+                        arrows: {
+                            to: { enabled: true }, // Agrega una flecha al final de la arista
+                        },
+                        smooth: {
+                            type: 'dynamic', // Hacer las aristas suaves
+                        },
+                    },
+                    "interaction": {
+                        "dragNodes": true,
+                        "hideEdgesOnDrag": false,
+                        "hideNodesOnDrag": false
+                    },
+
+                    "physics": {
+                        "enabled": true,
+                        "stabilization": {
+                            "enabled": true,
+                            "fit": true,
+                            "iterations": 1000,
+                            "onlyDynamicEdges": false,
+                            "updateInterval": 50
+                        }
+                    }
+                };
+
+                new vis.Network(container, dataVis, options);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Asignar eventos a los botones
+        document.querySelectorAll('.sidebar button').forEach(button => {
+        button.addEventListener('click', () => {
+            const algoritmo = button.getAttribute('data-algoritmo'); // Lee el atributo personalizado
+            console.log(algoritmo); // Ahora imprimirá el nombre exacto del algoritmo
+            actualizarGrafico(algoritmo); // Envía el algoritmo al backend
+        });
+    });
+    </script>
+
+<!--
+3.0    
 <script type="text/javascript">
     // initialize global variables.
     var edges;
@@ -147,7 +230,7 @@
     function drawGraph() {
         var container = document.getElementById('mynetwork');
         // parsing and collecting nodes and edges from the python
-        // NO HAY ERROR EL PROBLEMA ES CON VSCODE PERO FLASK SI LO EJECUTAz
+        // NO HAY ERROR EL PROBLEMA ES CON VSCODE PERO FLASK SI LO EJECUTA
         nodes = new vis.DataSet({{ nodos | safe }});
         edges = new vis.DataSet({{ aristas | safe }});
         nodeColors = {};
@@ -198,5 +281,5 @@
 
     }
     drawGraph();
-</script>
+</script>-->
 {% endblock %}

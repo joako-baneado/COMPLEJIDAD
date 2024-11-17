@@ -20,6 +20,21 @@ def crear_grafo_desde_excel(df_):
     
     return G
 
+def crear_grafonodirigido_desde_excel(df_):
+    df = df_
+    G = nx.Graph()  # Grafo nodirigido
+    
+    # Agregar nodos y aristas al grafo
+    for index, row in df.iterrows():
+        origen = row['ID Origen']
+        destino = row['ID Destino']
+        distancia = row['Longitud Tubería (m)']
+        
+        # Añadir una arista con la capacidad como peso
+        G.add_edge(origen, destino, weight=distancia)
+    
+    return G
+
 # Modificación en el algoritmo de Dijkstra para recibir nodo de inicio y fin
 def dijkstra(G, start, end):
     distances = {node: float('infinity') for node in G.nodes}
@@ -55,7 +70,74 @@ def dijkstra(G, start, end):
 
     return distances[end], path
 
-# Función para calcular el flujo máximo usando Ford-Fulkerson
+def flujo_maximo_ford_fulkerson(graph, source, sink):
+    """
+    Implementación del algoritmo de Ford-Fulkerson para calcular el flujo máximo en un grafo.
+
+    Parámetros:
+        graph (dict): Grafo representado como un diccionario de adyacencia con capacidades.
+                      Ejemplo: {'A': {'B': 10, 'C': 5}, 'B': {'C': 15, 'D': 10}, 'C': {'D': 10}}
+        source (str): Nodo de origen.
+        sink (str): Nodo de destino.
+
+    Retorna:
+        flujo_max (int): El flujo máximo entre el nodo de origen y el nodo de destino.
+    """
+    # Crear un diccionario para los flujos inicializados a 0
+    flow = {u: {v: 0 for v in graph[u]} for u in graph}
+
+    # Función para encontrar un camino aumentante usando BFS
+    def bfs_residual(graph, flow, source, sink):
+        visited = set()
+        parent = {}
+        queue = [source]
+        visited.add(source)
+
+        while queue:
+            current = queue.pop(0)
+            for neighbor in graph[current]:
+                # Capacidad residual = capacidad - flujo actual
+                residual_capacity = graph[current][neighbor] - flow[current][neighbor]
+                if residual_capacity > 0 and neighbor not in visited:
+                    parent[neighbor] = current
+                    visited.add(neighbor)
+                    if neighbor == sink:
+                        return parent
+                    queue.append(neighbor)
+        return None
+
+    # Inicializar flujo máximo
+    flujo_max = 0
+
+    # Encontrar caminos aumentantes mientras existan
+    while True:
+        parent = bfs_residual(graph, flow, source, sink)
+        if not parent:
+            break  # No hay más caminos aumentantes
+
+        # Determinar el flujo máximo que se puede enviar a través del camino aumentante
+        path_flow = float('inf')
+        s = sink
+        while s != source:
+            path_flow = min(path_flow, graph[parent[s]][s] - flow[parent[s]][s])
+            s = parent[s]
+
+        # Actualizar los flujos residuales
+        v = sink
+        while v != source:
+            u = parent[v]
+            flow[u][v] += path_flow
+            if v not in flow:
+                flow[v] = {}
+            flow[v][u] = flow[v].get(u, 0) - path_flow
+            v = u
+
+        # Incrementar el flujo máximo
+        flujo_max += path_flow
+
+    return flujo_max
+
+"""# Función para calcular el flujo máximo usando Ford-Fulkerson
 def flujo_maximo_ford_fulkerson(G, origen, destino):
     # Crear un diccionario para almacenar el flujo en cada arista
     flujo_dict = {}
@@ -85,7 +167,7 @@ def flujo_maximo_ford_fulkerson(G, origen, destino):
             # Recorrer los nodos adyacentes en el grafo residual
             for vecino in G[actual]:
                 # Verificar si la arista no está saturada (flujo < capacidad)
-                if flujo_dict[actual][vecino] < G[actual][vecino]:
+                if flujo_dict[actual][vecino] < G[actual][vecino].get('capacity', 0):
                     # Verificar si el vecino no ha sido visitado
                     if vecino not in visitados:
                         # Añadir el vecino al camino
@@ -117,7 +199,7 @@ def flujo_maximo_ford_fulkerson(G, origen, destino):
         # Calcular el flujo máximo que se puede enviar por el camino aumentante
         flujo_maximo = float('inf')
         for u, v in camino:
-            capacidad = G[u][v]
+            capacidad = G[u][v].get('capacity', 0)
             flujo_actual = flujo_dict[u][v]
             flujo_maximo = min(flujo_maximo, capacidad - flujo_actual)
         
@@ -129,7 +211,7 @@ def flujo_maximo_ford_fulkerson(G, origen, destino):
     # Calcular el flujo máximo total desde el origen
     flujo_max = sum(flujo_dict[origen].values())
     
-    return flujo_max, flujo_dict
+    return flujo_max, flujo_dict"""
 
 # Función para detectar y mostrar caminos críticos
 def detectar_caminos_criticos(G, flujo_dict, origen, destino):
