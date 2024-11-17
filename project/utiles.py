@@ -133,25 +133,3 @@ def flujo_maximo_ford_fulkerson(graph, source, sink):
             del flow_dict[u]
 
     return max_flow_value, caminos_recorridos
-
-def graficar(G,camino):
-    # Graficar solo el camino mínimo en el grafo
-    plt.figure(figsize=(10, 6))
-    pos = nx.spring_layout(G, seed=42)  # Posición de los nodos para el gráfico
-
-    # Resaltar solo el camino mínimo en el gráfico
-    path_edges = list(zip(camino, camino[1:]))  # Crear las aristas del camino mínimo
-    nx.draw_networkx_nodes(G, pos, nodelist=camino, node_size=50, node_color='orange')
-    nx.draw_networkx_edges(G, pos, edgelist=path_edges, edge_color='orange', width=2)
-
-    # Etiquetas opcionales para los nodos en el camino
-    nx.draw_networkx_labels(G, pos, labels={node: node for node in camino}, font_size=8)
-
-    # Título y mostrar el gráfico
-    plt.title(f"Camino mínimo desde {nodo_inicio} hasta {nodo_fin}")
-    plt.axis('off')  # Ocultar los ejes
-    plt.show()
-
-
-nodo_inicio = 'TAN-159'  # Cambia esto por el nodo de origen que deseas
-nodo_fin = 'USR-034'  # Cambia esto por el nodo de destino que deseas
