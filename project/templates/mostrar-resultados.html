@@ -104,7 +104,7 @@
         <input type="text" id="nodo-inicial" value="TAN-159">
         
         <label for="nodo-final">Nodo Final:</label>
-        <input type="text" id="nodo-final" value="USR-034">
+        <input type="text" id="nodo-final" value="USR-645">
         
         <button data-algoritmo="flujo-maximo">Flujo máximo</button>
         <button data-algoritmo="dijkstra">Camino mínimo</button>
@@ -113,16 +113,14 @@
     
     <div class="main-content">
         <div class="interpretacion">
-            Camino mínimo desde TAN-159 hasta USR-034
+            
         </div>
         <div class="graph">
             <div class="card" style="width: 100%">
                 <div id="mynetwork" class="card-body"></div>
             </div>
         </div>
-        <div class="description">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ornare dolor dolor, ut mollis dui vestibulum vel. Integer placerat lacus urna, congue ultrices eros semper ut. Etiam velit justo, porttitor id risus vitae, scelerisque auctor lectus. Vestibulum nulla lacus, ullamcorper sit amet ornare nec, dictum ut elit. Sed at diam varius, laoreet est ac, sollicitudin metus. Morbi id diam venenatis, dapibus ligula ut, rhoncus nunc. Donec non sapien varius nulla venenatis tincidunt. Donec quis est felis. Sed sed metus dapibus, malesuada ligula sed, consequat nisi.
-        </div>
+        <div class="description"></div>
     </div>
 
     <script>
@@ -144,10 +142,11 @@
                     return;
                 }
 
-                // Actualizar información
+                // Actualizar información en pantalla
                 document.querySelector('.interpretacion').innerText = data.info;
+                document.querySelector('.description').innerText = data.description;
 
-                // Actualizar el gráfico
+                // Actualizar el gráfo
                 const nodes = new vis.DataSet(data.nodos || []);
                 const edges = new vis.DataSet(data.aristas || []);
                 const container = document.getElementById('mynetwork');
@@ -165,13 +164,13 @@
 
                     edges: {
                         font: {
-                            align: 'middle', // Centra el texto sobre las aristas
+                            align: 'middle',
                         },
                         arrows: {
-                            to: { enabled: true }, // Agrega una flecha al final de la arista
+                            to: { enabled: true },
                         },
                         smooth: {
-                            type: 'dynamic', // Hacer las aristas suaves
+                            type: 'dynamic',
                         },
                     },
                     "interaction": {
@@ -197,89 +196,12 @@
             .catch(error => console.error('Error:', error));
         }
 
-        // Asignar eventos a los botones
+        // Asignacion de eventos a los botones
         document.querySelectorAll('.sidebar button').forEach(button => {
         button.addEventListener('click', () => {
-            const algoritmo = button.getAttribute('data-algoritmo'); // Lee el atributo personalizado
-            console.log(algoritmo); // Ahora imprimirá el nombre exacto del algoritmo
+            const algoritmo = button.getAttribute('data-algoritmo'); 
             actualizarGrafico(algoritmo); // Envía el algoritmo al backend
         });
     });
     </script>
-
-<!--
-3.0    
-<script type="text/javascript">
-    // initialize global variables.
-    var edges;
-    var nodes;
-    var allNodes;
-    var allEdges;
-    var nodeColors;
-    var originalNodes;
-    var network;
-    var container;
-    var options, data;
-    var filter = {
-        item : '',
-        property : '',
-        value : []
-    };
-
-    // This method is responsible for drawing the graph, returns the drawn network
-    function drawGraph() {
-        var container = document.getElementById('mynetwork');
-        // parsing and collecting nodes and edges from the python
-        // NO HAY ERROR EL PROBLEMA ES CON VSCODE PERO FLASK SI LO EJECUTA
-        nodes = new vis.DataSet({{ nodos | safe }});
-        edges = new vis.DataSet({{ aristas | safe }});
-        nodeColors = {};
-        allNodes = nodes.get({ returnType: "Object" });
-        for (nodeId in allNodes) {
-          nodeColors[nodeId] = allNodes[nodeId].color;
-        }
-        allEdges = edges.get({ returnType: "Object" });
-        // adding nodes and edges to the graph
-        data = {nodes: nodes, edges: edges};
-        var options = {
-            "configure": {
-                "enabled": false
-            },
-
-            "edges": {
-                "color": {
-                    "inherit": true
-                },
-                "smooth": {
-                    "enabled": true,
-                    "type": "dynamic"
-                }
-            },
-
-            "interaction": {
-                "dragNodes": true,
-                "hideEdgesOnDrag": false,
-                "hideNodesOnDrag": false
-            },
-
-            "physics": {
-                "enabled": true,
-                "stabilization": {
-                    "enabled": true,
-                    "fit": true,
-                    "iterations": 1000,
-                    "onlyDynamicEdges": false,
-                    "updateInterval": 50
-                }
-            }
-        };
-
-        network = new vis.Network(container, data, options);
-
-
-        return network;
-
-    }
-    drawGraph();
-</script>-->
 {% endblock %}
