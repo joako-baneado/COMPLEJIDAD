@@ -69,6 +69,7 @@ def calcular_algoritmo(algoritmo):
             distancia, camino = dijkstra(Gnd, nodo_inicio, nodo_fin)
             print(camino)
             path_edges = list(zip(camino, camino[1:]))
+            print(path_edges)
             response = {
                 'nodos': [{'id': node, 'label': node} for node in camino],
                 'aristas': [{'from': edge[0], 'to': edge[1], 'label': str(Gnd[edge[0]][edge[1]].get('weight', 0))} for edge in path_edges],
@@ -76,10 +77,14 @@ def calcular_algoritmo(algoritmo):
             }
 
         elif algoritmo == 'flujo-maximo':
-            print(G)
-            maxFlow = flujo_maximo_ford_fulkerson(G, nodo_inicio, nodo_fin)
-            print(maxFlow)
+            maxFlow, caminos = flujo_maximo_ford_fulkerson(G, nodo_inicio, nodo_fin)
+            print(caminos)
+            for camino in caminos:
+                path_edges = list(zip(camino, camino[1:]))
+            print(path_edges)
             response = {
+                'nodos': [{'id': node, 'label': node} for node in camino],
+                'aristas': [{'from': edge[0], 'to': edge[1], 'label': str(G[edge[0]][edge[1]].get('weight', 0))} for edge in path_edges],
                 'info': f'Flujo maximo: {maxFlow} l/s',
             }
 
