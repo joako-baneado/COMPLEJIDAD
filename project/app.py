@@ -114,16 +114,6 @@ def calcular_algoritmo(algoritmo):
             else:
                 return jsonify({'error': 'No se encontraron caminos.'}), 400
 
-        elif algoritmo == 'caminos-criticos':
-            caminos = detectar_caminos_criticos(G, nodo_inicio, nodo_fin)
-            response = {
-                'nodos': [{'id': node, 'label': node} for node in camino],
-                'aristas': [{'from': u, 'to': v, 'label': str(data.get('capacity', 0))} for u, v, data in G.edges(data=True)],
-                'info': f'Distancia mínima: {distancia} metros',
-            }
-        else:
-            return jsonify({'error': 'Algoritmo no reconocido.'}), 400
-
         return jsonify(response)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
