@@ -134,31 +134,6 @@ def flujo_maximo_ford_fulkerson(graph, source, sink):
 
     return max_flow_value, caminos_recorridos
 
-# Función para detectar y mostrar caminos críticos
-def detectar_caminos_criticos(G, flujo_dict, origen, destino):
-    # Crear una lista para almacenar los caminos críticos
-    caminos_criticos = []
-    
-    # Función auxiliar para hacer una búsqueda de camino crítico
-    def buscar_camino_critico(nodo_actual, camino_actual, ruta_actual):
-        if nodo_actual == destino:  # Si llegamos al destino, añadimos el camino completo
-            caminos_criticos.append((camino_actual, ruta_actual))
-            return
-        
-        # Recorrer los nodos adyacentes en el flujo
-        for vecino, flujo in flujo_dict[nodo_actual].items():
-            capacidad = G[nodo_actual][vecino]['capacity']
-            
-            # Verificar si la arista está saturada (flujo == capacidad)
-            if flujo == capacidad and flujo > 0:
-                # Continuar buscando en el siguiente nodo, añadiendo la arista al camino actual
-                buscar_camino_critico(vecino, camino_actual + [(nodo_actual, vecino, flujo, capacidad)], ruta_actual + [vecino])
-    
-    # Iniciar la búsqueda desde el origen
-    buscar_camino_critico(origen, [], [origen])
-    
-    return caminos_criticos
-
 def graficar(G,camino):
     # Graficar solo el camino mínimo en el grafo
     plt.figure(figsize=(10, 6))
